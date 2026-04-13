@@ -4,6 +4,8 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
 <title>PreTrend — Wear What's Next</title>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -138,14 +140,16 @@ section { padding:clamp(56px,8vw,100px) var(--px); }
 .product-card { cursor:pointer; position:relative; transition:transform 0.2s; }
 .product-card:hover { transform:translateY(-3px); }
 .product-img { aspect-ratio:3/4; background:var(--cream); border-radius:6px; overflow:hidden; position:relative; margin-bottom:10px; }
-.product-img-inner { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:clamp(2.2rem,7vw,3.8rem); transition:transform 0.4s; }
+.product-img-inner { width:100%; height:100%; display:flex; align-items:center; justify-content:center; transition:transform 0.4s; }
+.product-img-inner img { width: 100%; height: 100%; object-fit: cover; }
 .product-card:hover .product-img-inner { transform:scale(1.08); }
-.product-tag { position:absolute; top:8px; left:8px; background:var(--accent); color:#fff; font-size:0.58rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; padding:3px 7px; border-radius:2px; }
+.product-tag { position:absolute; top:8px; left:8px; background:var(--accent); color:#fff; font-size:0.58rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; padding:3px 7px; border-radius:2px; z-index: 2; }
 .product-tag.new { background:var(--accent2); }
-.product-wishlist { position:absolute; top:8px; right:8px; width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,0.9); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:0.85rem; opacity:0; transition:opacity 0.2s; }
+.product-wishlist { position:absolute; top:8px; right:8px; width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,0.9); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:0.85rem; opacity:0; transition:all 0.2s; z-index: 2; color: var(--gray); }
 .product-card:hover .product-wishlist { opacity:1; }
+.product-wishlist.active { background: var(--accent); color: white; opacity: 1; }
 @media(hover:none){ .product-wishlist { opacity:1; } }
-.product-quick-add { position:absolute; bottom:0; left:0; right:0; background:var(--black); color:var(--white); font-family:'Syne',sans-serif; font-weight:700; font-size:0.65rem; letter-spacing:0.1em; text-transform:uppercase; padding:10px; border:none; cursor:pointer; transform:translateY(100%); transition:transform 0.25s; }
+.product-quick-add { position:absolute; bottom:0; left:0; right:0; background:var(--black); color:var(--white); font-family:'Syne',sans-serif; font-weight:700; font-size:0.65rem; letter-spacing:0.1em; text-transform:uppercase; padding:10px; border:none; cursor:pointer; transform:translateY(100%); transition:transform 0.25s; z-index: 2; }
 .product-card:hover .product-quick-add { transform:translateY(0); }
 @media(hover:none){ .product-quick-add { transform:translateY(0); font-size:0.6rem; padding:8px; } }
 .product-quick-add:hover { background:var(--accent); }
@@ -157,6 +161,15 @@ section { padding:clamp(56px,8vw,100px) var(--px); }
 .price-save { font-size:0.65rem; color:var(--accent); font-weight:600; }
 .product-colors { display:flex; gap:4px; margin-top:7px; }
 .color-dot { width:11px; height:11px; border-radius:50%; cursor:pointer; border:2px solid transparent; transition:border-color 0.15s; }
+
+/* SEARCH OVERLAY */
+.search-overlay { position:fixed; inset:0; background:rgba(247,245,242,0.98); backdrop-filter:blur(5px); z-index:300; opacity:0; pointer-events:none; transition:opacity 0.3s; display:flex; align-items:flex-start; justify-content:center; padding-top:120px; }
+.search-overlay.open { opacity:1; pointer-events:all; }
+.search-box { width: 90%; max-width: 700px; display:flex; gap:15px; border-bottom: 2px solid var(--black); padding-bottom:10px; }
+.search-box input { flex:1; background:transparent; border:none; outline:none; font-family:'Syne',sans-serif; font-size:clamp(1.5rem, 4vw, 2.5rem); font-weight: 700; color:var(--black); }
+.search-box input::placeholder { color: var(--gray); opacity: 0.5; }
+.search-box button { background:none; border:none; font-size:2rem; cursor:pointer; color:var(--black); transition: color 0.2s; }
+.search-box button:hover { color: var(--accent); }
 
 /* BANNER */
 .banner { background:var(--black); color:var(--white); }
@@ -236,7 +249,8 @@ footer { background:var(--black); color:rgba(255,255,255,0.8); padding:clamp(44p
 .cart-close:hover { color:var(--accent); }
 .cart-items { flex:1; overflow-y:auto; padding:18px 22px; }
 .cart-item { display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--light); }
-.cart-item-img { width:64px; height:64px; background:var(--cream); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; flex-shrink:0; }
+.cart-item-img { width:64px; height:64px; background:var(--cream); border-radius:6px; display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; }
+.cart-item-img img { width: 100%; height: 100%; object-fit: cover; }
 .cart-item-info { flex:1; min-width:0; }
 .cart-item-name { font-family:'Syne',sans-serif; font-weight:600; font-size:0.82rem; margin-bottom:2px; }
 .cart-item-meta { font-size:0.7rem; color:var(--gray); margin-bottom:7px; }
@@ -256,6 +270,24 @@ footer { background:var(--black); color:rgba(255,255,255,0.8); padding:clamp(44p
 .cart-empty-icon { font-size:2.2rem; margin-bottom:10px; }
 .cart-empty-text { font-family:'Syne',sans-serif; font-weight:600; font-size:0.92rem; }
 
+/* CHECKOUT MODAL */
+.checkout-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:400; opacity:0; pointer-events:none; transition:opacity 0.3s; display:flex; align-items:center; justify-content:center; padding: 18px; }
+.checkout-overlay.open { opacity:1; pointer-events:all; }
+.checkout-modal { background:var(--white); width:100%; max-width:500px; border-radius:8px; padding:32px; position:relative; transform:translateY(20px); transition:transform 0.3s; max-height: 90vh; overflow-y: auto; }
+.checkout-overlay.open .checkout-modal { transform:translateY(0); }
+.checkout-header { font-family:'Syne',sans-serif; font-weight:800; font-size:1.4rem; margin-bottom:24px; }
+.checkout-close { position:absolute; top:20px; right:20px; background:none; border:none; font-size:1.4rem; cursor:pointer; color:var(--gray); transition:color 0.2s; }
+.checkout-close:hover { color:var(--accent); }
+.checkout-form { display:flex; flex-direction:column; gap:16px; }
+.form-row { display:flex; gap:16px; flex-wrap: wrap; }
+.form-group { display:flex; flex-direction:column; gap:6px; flex:1; min-width: 150px; }
+.form-group label { font-size:0.78rem; font-weight:600; color:var(--black); letter-spacing:0.02em; }
+.form-group input, .form-group textarea { padding:12px; border:1.5px solid var(--light); border-radius:4px; font-family:'DM Sans',sans-serif; font-size:0.9rem; outline:none; transition:border-color 0.2s; background: transparent; }
+.form-group input:focus, .form-group textarea:focus { border-color:var(--black); }
+.form-group textarea { resize:vertical; min-height:80px; }
+.btn-pay { background:var(--accent); color:var(--white); font-family:'Syne',sans-serif; font-weight:700; font-size:0.85rem; letter-spacing:0.08em; text-transform:uppercase; padding:16px; border:none; cursor:pointer; border-radius:4px; margin-top:10px; transition:background 0.2s; }
+.btn-pay:hover { background:var(--black); }
+
 /* TOAST */
 .toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--black); color:var(--white); font-family:'Syne',sans-serif; font-weight:600; font-size:0.8rem; padding:11px 22px; border-radius:100px; z-index:300; opacity:0; transition:all 0.35s cubic-bezier(0.4,0,0.2,1); white-space:nowrap; max-width:88vw; text-align:center; }
 .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
@@ -271,7 +303,13 @@ footer { background:var(--black); color:rgba(255,255,255,0.8); padding:clamp(44p
 </head>
 <body>
 
-<!-- NAV -->
+<div class="search-overlay" id="search-overlay" onclick="closeSearch()">
+  <div class="search-box" onclick="event.stopPropagation()">
+    <input type="text" id="search-input" placeholder="Search for styles, categories..." oninput="handleSearch()"/>
+    <button onclick="closeSearch()">✕</button>
+  </div>
+</div>
+
 <nav>
   <div class="nav-logo">Pre<span>Trend</span></div>
   <ul class="nav-links">
@@ -282,10 +320,10 @@ footer { background:var(--black); color:rgba(255,255,255,0.8); padding:clamp(44p
     <li><a href="#contact">Contact</a></li>
   </ul>
   <div class="nav-right">
-    <button class="nav-icon" onclick="showToast('Search coming soon!')">
+    <button class="nav-icon" onclick="openSearch()">
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
     </button>
-    <button class="nav-icon" onclick="showToast('Wishlist coming soon!')">
+    <button class="nav-icon" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'}); showToast('Scroll to browse wishlist items!')">
       <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
     </button>
     <button class="nav-icon" onclick="openCart()">
@@ -297,7 +335,6 @@ footer { background:var(--black); color:rgba(255,255,255,0.8); padding:clamp(44p
   </div>
 </nav>
 
-<!-- MOBILE MENU -->
 <div class="mobile-menu" id="mobile-menu">
   <a href="#categories" onclick="toggleMenu()">Shop</a>
   <a href="#products" onclick="toggleMenu()">New Arrivals</a>
@@ -306,7 +343,6 @@ footer { background:var(--black); color:rgba(255,255,255,0.8); padding:clamp(44p
   <a href="#contact" onclick="toggleMenu()">Contact</a>
 </div>
 
-<!-- HERO -->
 <section class="hero" id="home">
   <div class="hero-left">
     <div class="hero-tag">New Collection 2025</div>
@@ -337,7 +373,6 @@ footer { background:var(--black); color:rgba(255,255,255,0.8); padding:clamp(44p
   </div>
 </section>
 
-<!-- MARQUEE -->
 <div class="marquee-wrap">
   <div class="marquee-track">
     <div class="marquee-item">Free Returns <span class="marquee-dot"></span></div>
@@ -355,22 +390,19 @@ footer { background:var(--black); color:rgba(255,255,255,0.8); padding:clamp(44p
   </div>
 </div>
 
-<!-- CATEGORIES -->
 <section class="categories" id="categories">
   <div class="categories-header fade-in">
     <div><div class="section-tag">Browse</div><h2 class="section-title">Shop by<br/>Category</h2></div>
     <p class="section-sub">From street-ready fits to weekend casuals — find your style.</p>
   </div>
   <div class="cat-grid fade-in">
-    <div class="cat-card" onclick="filterProducts('men')"><div class="cat-bg"></div><div class="cat-pattern"></div><div class="cat-arrow">→</div><div class="cat-info"><div class="cat-name">Men's Fashion</div><div class="cat-count">142 styles</div></div></div>
-    <div class="cat-card" onclick="filterProducts('women')"><div class="cat-bg"></div><div class="cat-pattern"></div><div class="cat-arrow">→</div><div class="cat-info"><div class="cat-name">Women's Fashion</div><div class="cat-count">198 styles</div></div></div>
-    <div class="cat-card" onclick="filterProducts('kids')"><div class="cat-bg"></div><div class="cat-pattern"></div><div class="cat-arrow">→</div><div class="cat-info"><div class="cat-name">Kids' Wear</div><div class="cat-count">86 styles</div></div></div>
-    <div class="cat-card" onclick="filterProducts('all')"><div class="cat-bg"></div><div class="cat-pattern"></div><div class="cat-arrow">→</div><div class="cat-info"><div class="cat-name">Accessories</div><div class="cat-count">74 items</div></div></div>
-    <div class="cat-card" onclick="filterProducts('all')"><div class="cat-bg"></div><div class="cat-pattern"></div><div class="cat-arrow">→</div><div class="cat-info"><div class="cat-name">Sale</div><div class="cat-count">Up to 50% off</div></div></div>
+    <div class="cat-card" onclick="filterProducts('men', document.querySelectorAll('.filter-tab')[1])"><div class="cat-bg"></div><div class="cat-pattern"></div><div class="cat-arrow">→</div><div class="cat-info"><div class="cat-name">Men's Fashion</div><div class="cat-count">10 styles</div></div></div>
+    <div class="cat-card" onclick="filterProducts('all', document.querySelectorAll('.filter-tab')[0])"><div class="cat-bg"></div><div class="cat-pattern"></div><div class="cat-arrow">→</div><div class="cat-info"><div class="cat-name">Accessories</div><div class="cat-count">Coming soon</div></div></div>
+    <div class="cat-card" onclick="filterProducts('all', document.querySelectorAll('.filter-tab')[0])"><div class="cat-bg"></div><div class="cat-pattern"></div><div class="cat-arrow">→</div><div class="cat-info"><div class="cat-name">Sale</div><div class="cat-count">Up to 50% off</div></div></div>
+    <div class="cat-card" onclick="filterProducts('all', document.querySelectorAll('.filter-tab')[0])"><div class="cat-bg"></div><div class="cat-pattern"></div><div class="cat-arrow">→</div><div class="cat-info"><div class="cat-name">Summer Days</div><div class="cat-count">Coming soon</div></div></div>
   </div>
 </section>
 
-<!-- PRODUCTS -->
 <section id="products">
   <div class="products-header fade-in">
     <div><div class="section-tag">Catalogue</div><h2 class="section-title">New Arrivals</h2></div>
@@ -383,8 +415,44 @@ footer { background:var(--black); color:rgba(255,255,255,0.8); padding:clamp(44p
   </div>
   <div class="products-grid" id="products-grid"></div>
 </section>
-
-<!-- BANNER -->
+<div class="checkout-overlay" id="checkout-overlay" onclick="closeCheckoutForm(event)">
+  <div class="checkout-modal" onclick="event.stopPropagation()">
+    <button class="checkout-close" onclick="closeCheckoutForm()">✕</button>
+    <div class="checkout-header">Shipping Details</div>
+    
+    <form class="checkout-form" id="checkout-form" onsubmit="handleCheckoutSubmit(event)">
+      <div class="form-group">
+        <label>Full Name *</label>
+        <input type="text" id="chk-name" placeholder="John Doe" required />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Email *</label>
+          <input type="email" id="chk-email" placeholder="john@example.com" required />
+        </div>
+        <div class="form-group">
+		  <label>Phone Number *</label>
+		  <input type="tel" id="chk-phone" pattern="[6-9][0-9]{9}" placeholder="9999999999" title="Valid 10-digit mobile number" required autocomplete="tel" />
+		</div>
+      </div>
+      <div class="form-group">
+        <label>Delivery Address *</label>
+        <textarea id="chk-address" placeholder="House/Flat No., Street, Landmark..." required></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>City *</label>
+          <input type="text" id="chk-city" placeholder="Mumbai" required />
+        </div>
+        <div class="form-group">
+          <label>PIN Code *</label>
+          <input type="text" id="chk-pin" pattern="[0-9]{6}" placeholder="400001" title="6 digit PIN code" required />
+        </div>
+      </div>
+      <button type="submit" class="btn-pay" id="btn-pay-now">Proceed to Pay</button>
+    </form>
+  </div>
+</div>
 <section class="banner" id="about">
   <div class="banner-inner">
     <div class="fade-in" style="flex:1">
@@ -409,7 +477,6 @@ footer { background:var(--black); color:rgba(255,255,255,0.8); padding:clamp(44p
   </div>
 </section>
 
-<!-- REVIEWS -->
 <section class="testimonials" id="reviews">
   <div class="testimonials-header fade-in">
     <div class="section-tag">Reviews</div>
@@ -423,7 +490,6 @@ footer { background:var(--black); color:rgba(255,255,255,0.8); padding:clamp(44p
   </div>
 </section>
 
-<!-- NEWSLETTER -->
 <section class="newsletter" id="contact">
   <h2 class="newsletter-title">Get First Access<br/>to New Drops</h2>
   <p class="newsletter-sub">Subscribe and get 10% off your first order + exclusive early access.</p>
@@ -433,21 +499,20 @@ footer { background:var(--black); color:rgba(255,255,255,0.8); padding:clamp(44p
   </div>
 </section>
 
-<!-- FOOTER -->
 <footer>
   <div class="footer-top">
     <div class="footer-brand">
       <span class="footer-logo">Pre<span>Trend</span></span>
       <p class="footer-desc">Wear What's Next. PreTrend is your destination for fresh casual fashion for the whole family — new styles every week, delivered across India.</p>
       <div class="footer-socials">
-        <a class="social-btn" href="#" onclick="showToast('Instagram coming soon!')">in</a>
+        <a class="social-btn" href="https://www.instagram.com/pretrend.online" >IG</a>
         <a class="social-btn" href="#" onclick="showToast('Facebook coming soon!')">fb</a>
         <a class="social-btn" href="#" onclick="showToast('WhatsApp coming soon!')">wa</a>
         <a class="social-btn" href="#" onclick="showToast('YouTube coming soon!')">yt</a>
       </div>
     </div>
     <div><div class="footer-col-title">Shop</div><ul class="footer-links"><li><a href="#">Men's Fashion</a></li><li><a href="#">Women's Fashion</a></li><li><a href="#">Kids' Wear</a></li><li><a href="#">Accessories</a></li><li><a href="#">Sale</a></li></ul></div>
-    <div><div class="footer-col-title">Help</div><ul class="footer-links"><li><a href="#">Track Your Order</a></li><li><a href="#">Returns & Exchanges</a></li><li><a href="#">Size Guide</a></li><li><a href="#">FAQs</a></li><li><a href="#">Contact Us</a></li></ul></div>
+    <div><div class="footer-col-title">Help</div><ul class="footer-links"><li><a href="#">Track Your Order</a></li><li><a href="#">Returns & Exchanges</a></li><li><a href="#">Size Guide</a></li><li><a href="#">FAQs</a></li><li><a href="mailto:pretrend@proton.me">Contact Us</a></li></ul></div>
     <div><div class="footer-col-title">Company</div><ul class="footer-links"><li><a href="#">About PreTrend</a></li><li><a href="#">Careers</a></li><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms & Conditions</a></li><li><a href="#">Sitemap</a></li></ul></div>
   </div>
   <div class="footer-bottom">
@@ -456,7 +521,6 @@ footer { background:var(--black); color:rgba(255,255,255,0.8); padding:clamp(44p
   </div>
 </footer>
 
-<!-- CART -->
 <div class="cart-overlay" id="cart-overlay" onclick="closeCart()"></div>
 <div class="cart-sidebar" id="cart-sidebar">
   <div class="cart-header">
@@ -468,38 +532,43 @@ footer { background:var(--black); color:rgba(255,255,255,0.8); padding:clamp(44p
   </div>
   <div class="cart-footer" id="cart-footer" style="display:none">
     <div class="cart-subtotal"><span class="cart-subtotal-label">Subtotal</span><span class="cart-subtotal-val" id="cart-total">₹0</span></div>
-    <button class="cart-checkout" onclick="showToast('Integrate Razorpay to enable checkout!')">Proceed to Checkout →</button>
+    <button class="cart-checkout" onclick="openCheckoutForm()">Proceed to Checkout →</button>
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<!-- WHATSAPP -->
 <a class="whatsapp-btn" href="https://wa.me/91XXXXXXXXXX" target="_blank" onclick="showToast('Replace number in code with yours!')">💬</a>
 
 <script>
+// Swapped Emojis for real high-quality fashion images via Unsplash
 const products=[
-  {id:1,name:'Oversized Graphic Tee',brand:'PreTrend Men',category:'men',price:799,oldPrice:1199,emoji:'👕',colors:['#1a1a1a','#e8421a','#fff'],tag:'Sale',tagType:'sale'},
-  {id:2,name:'High-Rise Mom Jeans',brand:'PreTrend Women',category:'women',price:1499,oldPrice:2199,emoji:'👖',colors:['#1a3a6e','#000','#8B4513'],tag:'Trending',tagType:'sale'},
-  {id:3,name:'Cargo Joggers',brand:'PreTrend Men',category:'men',price:1299,oldPrice:null,emoji:'🩳',colors:['#2d5016','#1a1a1a','#8B7355'],tag:'New',tagType:'new'},
-  {id:4,name:'Floral Midi Dress',brand:'PreTrend Women',category:'women',price:1799,oldPrice:2499,emoji:'👗',colors:['#ff6b9d','#fff','#4a0e8f'],tag:'Sale',tagType:'sale'},
-  {id:5,name:'Dinosaur Print Set',brand:'PreTrend Kids',category:'kids',price:699,oldPrice:999,emoji:'🦕',colors:['#2ecc71','#3498db','#e74c3c'],tag:'Kids',tagType:'new'},
-  {id:6,name:'Tie-Dye Hoodie',brand:'PreTrend Women',category:'women',price:1599,oldPrice:null,emoji:'🧥',colors:['#9b59b6','#f39c12','#1abc9c'],tag:'New',tagType:'new'},
-  {id:7,name:'Slim Fit Chinos',brand:'PreTrend Men',category:'men',price:1199,oldPrice:1699,emoji:'👔',colors:['#d4a574','#1a1a1a','#2c5f2e'],tag:'Sale',tagType:'sale'},
-  {id:8,name:'Unicorn Tee & Shorts',brand:'PreTrend Kids',category:'kids',price:599,oldPrice:899,emoji:'🦄',colors:['#ff69b4','#dda0dd','#fff'],tag:'Kids',tagType:'new'},
+  {id:1,name:'Oversized Graphic Tee',brand:'PreTrend Men',category:'men',price:799,oldPrice:1199,image:'https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&q=80&w=400',colors:['#1a1a1a','#e8421a','#fff'],tag:'Sale',tagType:'sale'},
+  {id:2,name:'High-Rise Mom Jeans',brand:'PreTrend Women',category:'women',price:1499,oldPrice:2199,image:'https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&q=80&w=400',colors:['#1a3a6e','#000','#8B4513'],tag:'Trending',tagType:'sale'},
+  {id:3,name:'Cargo Joggers',brand:'PreTrend Men',category:'men',price:1299,oldPrice:null,image:'https://images.unsplash.com/photo-1555689502-c4b22d76c56f?auto=format&fit=crop&q=80&w=400',colors:['#2d5016','#1a1a1a','#8B7355'],tag:'New',tagType:'new'},
+  {id:4,name:'Floral Midi Dress',brand:'PreTrend Women',category:'women',price:1799,oldPrice:2499,image:'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&q=80&w=400',colors:['#ff6b9d','#fff','#4a0e8f'],tag:'Sale',tagType:'sale'},
+  {id:5,name:'Dinosaur Print Set',brand:'PreTrend Kids',category:'kids',price:699,oldPrice:999,image:'https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?auto=format&fit=crop&q=80&w=400',colors:['#2ecc71','#3498db','#e74c3c'],tag:'Kids',tagType:'new'},
+  {id:6,name:'Tie-Dye Hoodie',brand:'PreTrend Women',category:'women',price:1599,oldPrice:null,image:'https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&q=80&w=400',colors:['#9b59b6','#f39c12','#1abc9c'],tag:'New',tagType:'new'},
+  {id:7,name:'Slim Fit Chinos',brand:'PreTrend Men',category:'men',price:1199,oldPrice:1699,image:'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&q=80&w=400',colors:['#d4a574','#1a1a1a','#2c5f2e'],tag:'Sale',tagType:'sale'},
+  {id:8,name:'Denim Overalls',brand:'PreTrend Kids',category:'kids',price:599,oldPrice:899,image:'https://images.unsplash.com/photo-1519241047957-be31d7379a5d?auto=format&fit=crop&q=80&w=400',colors:['#ff69b4','#dda0dd','#fff'],tag:'Kids',tagType:'new'},
 ];
-let cart=[];
 
-function renderProducts(filter){
+let cart=[];
+let wishlist=[];
+
+function renderProducts(itemsToRender){
   const grid=document.getElementById('products-grid');
-  const filtered=filter==='all'?products:products.filter(p=>p.category===filter);
-  grid.innerHTML=filtered.map(p=>`
+  if(itemsToRender.length === 0) {
+    grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding: 40px; color: var(--gray);">No styles found matching your search.</div>';
+    return;
+  }
+  
+  grid.innerHTML=itemsToRender.map(p=>`
     <div class="product-card">
       <div class="product-img">
-        <div class="product-img-inner">${p.emoji}</div>
+        <div class="product-img-inner"><img src="${p.image}" alt="${p.name}" loading="lazy"/></div>
         ${p.tag?`<span class="product-tag ${p.tagType}">${p.tag}</span>`:''}
-        <button class="product-wishlist" onclick="event.stopPropagation();showToast('Added to wishlist!')">♡</button>
+        <button class="product-wishlist ${wishlist.includes(p.id) ? 'active' : ''}" onclick="event.stopPropagation(); toggleWishlist(${p.id}, this)">♡</button>
         <button class="product-quick-add" onclick="event.stopPropagation();addToCart(${p.id})">+ Add to Bag</button>
       </div>
       <div class="product-brand">${p.brand}</div>
@@ -515,12 +584,51 @@ function renderProducts(filter){
 }
 
 function filterProducts(filter,btn){
-  renderProducts(filter);
+  const filtered=filter==='all'?products:products.filter(p=>p.category===filter);
+  renderProducts(filtered);
   document.querySelectorAll('.filter-tab').forEach(b=>b.classList.remove('active'));
   if(btn)btn.classList.add('active');
   document.getElementById('products').scrollIntoView({behavior:'smooth'});
 }
 
+// SEARCH FUNCTIONALITY
+function openSearch(){
+  document.getElementById('search-overlay').classList.add('open');
+  document.getElementById('search-input').focus();
+  document.body.style.overflow='hidden';
+}
+function closeSearch(){
+  document.getElementById('search-overlay').classList.remove('open');
+  document.getElementById('search-input').value = '';
+  document.body.style.overflow='';
+  renderProducts(products); // Reset search
+  document.querySelectorAll('.filter-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.filter-tab')[0].classList.add('active'); // Set 'All' active
+}
+function handleSearch(){
+  const query = document.getElementById('search-input').value.toLowerCase();
+  const filtered = products.filter(p => p.name.toLowerCase().includes(query) || p.brand.toLowerCase().includes(query) || p.category.toLowerCase().includes(query));
+  
+  document.querySelectorAll('.filter-tab').forEach(b=>b.classList.remove('active'));
+  renderProducts(filtered);
+  document.getElementById('products').scrollIntoView({behavior:'smooth'});
+}
+
+// WISHLIST FUNCTIONALITY
+function toggleWishlist(id, btn){
+  const index = wishlist.indexOf(id);
+  if (index > -1) {
+    wishlist.splice(index, 1);
+    btn.classList.remove('active');
+    showToast('Removed from wishlist');
+  } else {
+    wishlist.push(id);
+    btn.classList.add('active');
+    showToast('Added to wishlist! ❤️');
+  }
+}
+
+// CART FUNCTIONALITY
 function addToCart(id){
   const product=products.find(p=>p.id===id);
   const existing=cart.find(c=>c.id===id);
@@ -545,7 +653,7 @@ function updateCart(){
     footer.style.display='block';
     itemsEl.innerHTML=cart.map(item=>`
       <div class="cart-item">
-        <div class="cart-item-img">${item.emoji}</div>
+        <div class="cart-item-img"><img src="${item.image}" alt="${item.name}" loading="lazy"/></div>
         <div class="cart-item-info">
           <div class="cart-item-name">${item.name}</div>
           <div class="cart-item-meta">${item.brand}</div>
@@ -592,7 +700,152 @@ function handleSubscribe(){
 
 const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.07});
 document.querySelectorAll('.fade-in').forEach(el=>observer.observe(el));
-renderProducts('all');
+renderProducts(products); // Initial load
+
+
+function initiateRazorpayCheckout() {
+  // Razorpay expects the amount in paise (smallest currency unit), so we multiply by 100
+  const totalAmount = cart.reduce((s, c) => s + c.price * c.qty, 0) * 100;
+
+  if (totalAmount === 0) {
+    showToast('Your bag is empty!');
+    return;
+  }
+
+  var options = {
+    "key": "YOUR_TEST_KEY_ID", // Replace with your actual Test Key ID from Razorpay Dashboard
+    "amount": totalAmount.toString(), 
+    "currency": "INR",
+    "name": "PreTrend",
+    "description": "Checkout Transaction",
+    "image": "https://dummyimage.com/150x150/0e0e0e/f7f5f2.png&text=PT", // Your store logo
+    // "order_id": "order_9A33XWu170gUtm", // In production, this MUST be generated by a backend!
+    "handler": function (response){
+        // This runs when the payment is successful
+        console.log("Payment ID:", response.razorpay_payment_id);
+        
+        // Empty the cart
+        cart = [];
+        updateCart();
+        closeCart();
+        
+        // Show success message
+        showToast('Payment successful! Order placed. 🎉');
+    },
+    "prefill": {
+        "name": "Test Customer",
+        "email": "customer@example.com",
+        "contact": "9999999999"
+    },
+    "theme": {
+        "color": "#e8421a" // Matches your PreTrend accent color
+    }
+  };
+
+  var rzp = new Razorpay(options);
+  
+  rzp.on('payment.failed', function (response){
+      console.error("Payment Failed", response.error.description);
+      showToast('Payment failed. Please try again.');
+  });
+  
+  rzp.open();
+}
+// --- NEW CHECKOUT FLOW --- //
+
+function openCheckoutForm() {
+  if (cart.length === 0) return;
+  closeCart(); // Hide the side-cart
+  document.getElementById('checkout-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden'; // Stop background scrolling
+  
+  // Update the button text to show the dynamic amount
+  const totalAmount = cart.reduce((s, c) => s + c.price * c.qty, 0);
+  document.getElementById('btn-pay-now').textContent = `Pay ₹${totalAmount.toLocaleString('en-IN')}`;
+}
+
+function closeCheckoutForm(e) {
+  // Only close if clicking the background or the X button
+  if (e && e.target !== document.getElementById('checkout-overlay') && e.target.className !== 'checkout-close') return;
+  document.getElementById('checkout-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function handleCheckoutSubmit(e) {
+  e.preventDefault(); // Stop page from refreshing
+  
+  const phoneVal = document.getElementById('chk-phone').value;
+  
+  // Custom JS Validation: Must be 10 digits and start with 6, 7, 8, or 9
+  const phoneRegex = /^[6-9]\d{9}$/;
+  if (!phoneRegex.test(phoneVal)) {
+    showToast('Please enter a valid 10-digit mobile number!');
+    document.getElementById('chk-phone').focus();
+    return; // Stop the form from submitting
+  }
+  
+  // 1. Gather all the data the user just typed
+  const customerData = {
+    name: document.getElementById('chk-name').value,
+    email: document.getElementById('chk-email').value,
+    phone: phoneVal,
+    address: document.getElementById('chk-address').value,
+    city: document.getElementById('chk-city').value,
+    pin: document.getElementById('chk-pin').value
+  };
+  
+  // 2. Pass it to Razorpay
+  initiateRazorpayCheckout(customerData);
+}
+
+function initiateRazorpayCheckout(customerData) {
+  const totalAmount = cart.reduce((s, c) => s + c.price * c.qty, 0) * 100; // Razorpay needs paise
+
+  var options = {
+    "key": "YOUR_TEST_KEY_ID", // TODO: Replace with your actual Test Key ID
+    "amount": totalAmount.toString(), 
+    "currency": "INR",
+    "name": "PreTrend",
+    "description": "Apparel Order",
+    "image": "https://dummyimage.com/150x150/0e0e0e/f7f5f2.png&text=PT", 
+    "handler": function (response){
+        // PAYMENT SUCCESSFUL!
+        console.log("Payment ID:", response.razorpay_payment_id);
+        
+        // Normally, you would send customerData + cart items + payment ID to your database here
+        console.log("Order Data saved to DB:", customerData); 
+        
+        // Clean up UI
+        cart = [];
+        updateCart();
+        closeCheckoutForm();
+        document.getElementById('checkout-form').reset();
+        
+        showToast('Payment successful! Your styles are on the way. 🎉');
+    },
+    // We inject the form data here so Razorpay pre-fills it automatically!
+    "prefill": {
+        "name": customerData.name,
+        "email": customerData.email,
+        "contact": customerData.phone
+    },
+    "notes": {
+        "shipping_address": `${customerData.address}, ${customerData.city} - ${customerData.pin}`
+    },
+    "theme": {
+        "color": "#e8421a" // PreTrend brand color
+    }
+  };
+
+  var rzp = new Razorpay(options);
+  
+  rzp.on('payment.failed', function (response){
+      console.error("Payment Failed", response.error.description);
+      showToast('Payment failed. Please try again.');
+  });
+  
+  rzp.open();
+}
 </script>
 </body>
 </html>
